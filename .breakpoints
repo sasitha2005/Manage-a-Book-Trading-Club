@@ -1,0 +1,18 @@
+{
+  "files": {
+    "views/allbooks.pug": [
+      {
+        "id": "d7a37f17-6c31-4ff1-b1e3-bdc90f74017c",
+        "line": 12,
+        "version": 2892,
+        "index": 484
+      },
+      {
+        "id": "dd05f583-853a-44aa-a5f6-41fafb98a7e9",
+        "line": 48,
+        "version": 2885,
+        "index": 2629
+      }
+    ]
+  }
+}

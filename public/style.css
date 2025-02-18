@@ -1,0 +1,53 @@
+/* Import Fonts */
+@import url('https://fonts.googleapis.com/css2?family=Roboto&display=swap');
+
+/* Body */
+body {
+  font-family: "Roboto", Arial, Verdana, sans-serif;
+}
+
+/* Navigation */
+
+.nav-link:hover {
+  background-color: darkblue;
+  color: lightyellow;
+}
+
+/* Card */
+
+.card {
+  border: 1px solid black;
+  padding: 0.5rem;
+}
+
+.card-header {
+  height: 125px;
+  background-color: yellow;
+  font-weight:bold;
+}
+
+.publisher-info {
+  height: 110px;
+  padding: 0.5rem;
+}
+
+.center-block {
+  margin-left: auto;
+  margin-right: auto;
+}
+
+/* Jumbotron */
+.jumbotron {
+  background-color: lightblue;
+  padding-top: 1rem;
+}
+
+/* Search Results */
+#example-search, .search-results {
+  padding-top: 1rem;
+}
+
+/* Background Color for Search */
+.cremedepeche {
+  background-color: #f5d6c6;
+}

@@ -1,0 +1,89 @@
+doctype html
+html(lang='en')
+  head
+    title Book Trading Club
+    meta(charset='utf-8')
+    meta(name='description', content='Book Trading Club')
+    meta(name='viewport', content='width=device-width, initial-scale=1')
+    // Load Styles
+    link(rel='stylesheet' href='https://cdn.jsdelivr.net/npm/bootstrap@5.1.1/dist/css/bootstrap.min.css')
+    link(rel='stylesheet' href='https://use.fontawesome.com/releases/v5.15.4/css/all.css')
+    link(rel='stylesheet' href='/style.css')
+  body
+    // Navbar
+    nav(class='navbar navbar-expand-lg navbar-dark bg-primary')
+      article(class='container-fluid')
+        a(class='navbar-brand' href='/' style='color: yellow;') Book TC
+        button(class='navbar-toggler navbar-toggler-right' type='button' data-bs-toggle='collapse' data-bs-target='#navbarColor01' aria-controls='navbarColor01' aria-expanded='false' aria-label='Toggle navigation')
+          span(class='navbar-toggler-icon')
+        article(class='collapse navbar-collapse' id='navbarColor01')
+          form(class='d-flex' action='/search' method='get')
+            input(class='form-control me-2' type='text' aria-label='Book Title' placeholder='Book Title (e.g. London)' name='title')
+            button(class='btn btn-success' type='submit' title='Search Book Title') &nbsp;
+              i(class='fas fa-search' style='font-size:1.5rem;')
+          // Set Navbar according to user login
+          ul(class='navbar-nav me-auto mb-2 mb-lg-0')
+            if !user
+              li(class='nav-item')
+                a(class='nav-link' href='/auth/login') Log In
+              li(class='nav-item')
+                a(class='nav-link' href='/auth/signup') Sign Up
+            else
+              // Dropdown Menu
+              li(class='nav-item dropdown')
+                a(class='nav-link dropdown-toggle' data-bs-toggle='dropdown' href='#' role='button' aria-haspopup='true' aria-expanded='true') #{user.local.username}
+                article(class='dropdown-menu')
+                  a(class='dropdown-item' href='/profile') Profile
+                  a(class='dropdown-item' href='/profile/trade') Trade List
+                  article(class='dropdown-divider')
+                  - let userIdDrop = user._id
+                  a(class='dropdown-item' href='/profile/setting/' + userIdDrop) Setting
+              li(class='nav-item')
+                a(class='nav-link' href='/allbooks') All Books
+              li(class='nav-item')
+                a(class='nav-link' href='/auth/logout') Log Out
+    article(class='jumbotron')
+      article(class='container-fluid text-center')
+        h2(class='display-4') Welcome to Book Trading Club &nbsp;
+          i(class='fas fa-book')
+        p You can search the book you want and make a book trading request with other peers
+        //- Set Up Form
+        form(action='/search' method='get' class='d-flex')
+          article(class='input-group mb-3')
+            input(type='text' class='form-control' placeholder='Enter Book Title (e.g. Web Development)' name='title')
+            span(class='input-group-btn')
+              button(class='btn btn-success' type='submit') Search &nbsp;
+                i(class='fas fa-search')
+    // Example Search Items
+    article(id='example-search' class='container-fluid')
+      h1(class='text-center') Example Search
+      // Display Search Results
+      article(class='row mt-4 mb-4')
+        each book in books
+          article(class='col-md-4 mb-4')
+            article(class='card')
+              // Set Variables for Links
+              - let bookThumbnail = book.thumbnail
+              - let bookLink = book.link
+              - let bookTitle = book.title
+              h6(class='card-header') #{book.title}
+              article(class='card-block mt-2 publisher-info')
+                if book.industryIdentifiers && book.industryIdentifiers.length > 0
+                  h6(class='card-title ml-4') ISBN13: #{book.industryIdentifiers[0].identifier}
+                else
+                  h6(class='card-title ml-4') ISBN13: Not Available
+                h6(class='card-subtitle text-muted ml-4') Publisher: #{book.publisher}
+              img(class='center-block mt-3 mb-3' style='height: 168px; width: 128px; display: block;' src=bookThumbnail alt='Card Image')
+              // Create Full-Width Block Button
+              article(class='card-block d-grid gap-2')
+                a(href=bookLink class='card-link btn btn-primary' title='View More Information for ' + bookTitle target='_blank') More Info
+    // Propose Trade Form
+    article(class='container-fluid')
+      h1(class='text-center mt-4') Propose a Trade
+      form(id='trade-form' class='d-flex flex-column align-items-center')
+        input(type='text' id='book-offered' class='form-control mb-2' placeholder='Book Offered ID' required)
+        input(type='text' id='book-requested' class='form-control mb-2' placeholder='Book Requested ID' required)
+        button(type='submit' class='btn btn-primary mb-4') Propose Trade
+    // Load Scripts
+    script(src='https://cdn.jsdelivr.net/npm/bootstrap@5.1.1/dist/js/bootstrap.bundle.min.js')
+    

@@ -1,0 +1,85 @@
+doctype html
+html(lang='en')
+  head
+    title Book Trading Club
+    meta(charset='utf-8')
+    meta(name='description',content='Book Trading Club')
+    meta(name='viewport', content='width=device-width, initial-scale=1')
+    // Load Styles
+    link(rel='stylesheet' href='https://cdn.jsdelivr.net/npm/bootstrap@5.1.1/dist/css/bootstrap.min.css')
+    link(rel='stylesheet' href='https://use.fontawesome.com/releases/v5.15.4/css/all.css')
+    link(rel='stylesheet', href='/style.css')   
+  body
+    // Navbar
+    nav(class='navbar navbar-expand-lg navbar-dark bg-primary')
+      article(class='container-fluid')
+        button(class='navbar-toggler navbar-toggler-right' type='button' data-bs-toggle='collapse' data-bs-target='#navbarColor01' aria-controls='navbarColor01' aria-expanded='false' aria-label='Toggle navigation')
+          span(class='navbar-toggler-icon')
+        a(class='navbar-brand' href='/' style='color:yellow;') Book TC
+        article(class='collapse navbar-collapse' id='navbarColor01')
+          form(class='d-flex' action='/search' method='get')
+            input(class='form-control me-2' type='text' aria-label='Book Title' placeholder='Book Title (e.g. London)' name='title')
+            button(class='btn btn-success' type='submit' title='Search Book Title') &nbsp;
+              i(class='fas fa-search' style='font-size:1.5rem;')
+          // Set Navbar according to user login
+          ul(class='navbar-nav me-auto mb-2 mb-lg-0')
+            if !user
+              li(class='nav-item')
+                a(class='nav-link' href='/auth/login') Log In
+              li(class='nav-item')
+                a(class='nav-link' href='/auth/signup') Sign Up
+            else
+              // Dropdown Menu
+              li(class='nav-item dropdown')
+                a(class='nav-link dropdown-toggle' data-bs-toggle='dropdown' href='#' role='button' aria-haspopup='true' aria-expanded='true') #{user.local.username}
+                article(class='dropdown-menu')
+                  a(class='dropdown-item' href='/profile') Profile
+                  a(class='dropdown-item' href='/profile/trade') Trade List
+                  article(class='dropdown-divider')
+                  - let userIdDrop = user._id
+                  a(class='dropdown-item' href='/profile/setting/' + userIdDrop) Setting
+              li(class='nav-item')
+                a(class='nav-link' href='/allbooks') All Books
+              li(class='nav-item')
+                a(class='nav-link' href='/auth/logout') Log Out
+    article(class='container-fluid')
+      article(id='book' class='mt-4')
+        if (books.length > 0)
+          // If there are books
+          article(class='row')
+            article(class='col-lg-12')
+              article(class='panel panel-default')
+                article(class='panel panel-heading bg-main-color')
+                  h3(style='color:orange;') Your Book List
+                article(class='panel-body')
+                  table(class='table table-striped table-hover')
+                    thead
+                      tr
+                        th #
+                        th Title
+                        th Image
+                        th Publisher
+                        th Action
+                    tbody
+                      each book,i in books
+                        tr
+                          td #{i+1}
+                          td
+                            // Set Up Variables for links
+                            - let bookLink = book.link
+                            - let bookImageUrl = book.imageurl
+                            - let bookId = book._id
+                            a(href=bookLink target='_blank' style='text-decoration: none;') #{book.title}
+                          td
+                            img(src=bookImageUrl alt='Front Cover')
+                          td #{book.publisher}
+                          td
+                            form(action='/profile/removeBook/' + bookId method='post')
+                              article(class='d-grid gap-2')
+                                input(type='submit' class='btn btn-primary' value='Remove')
+        else
+          h4 Your book list is currently empty
+    // Load Scripts
+    script(src='https://cdn.jsdelivr.net/npm/bootstrap@5.1.1/dist/js/bootstrap.bundle.min.js')
+
+          

@@ -1,0 +1,82 @@
+doctype html
+html(lang='en')
+  head
+    title Book Trading Club
+    meta(charset='utf-8')
+    meta(name='description',content='Book Trading Club')
+    meta(name='viewport', content='width=device-width, initial-scale=1')
+    // Load Styles
+    link(rel='stylesheet' href='https://cdn.jsdelivr.net/npm/bootstrap@5.1.1/dist/css/bootstrap.min.css')
+    link(rel='stylesheet' href='https://use.fontawesome.com/releases/v5.15.4/css/all.css')
+    link(rel='stylesheet', href='/style.css')
+  body
+    // Navbar
+    nav(class='navbar navbar-expand-lg navbar-dark bg-primary')
+      article(class='container-fluid')
+        button(class='navbar-toggler navbar-toggler-right' type='button' data-bs-toggle='collapse' data-bs-target='#navbarColor01' aria-controls='navbarColor01' aria-expanded='false' aria-label='Toggle navigation')
+          span(class='navbar-toggler-icon')
+        a(class='navbar-brand' href='/' style='color:yellow;') Book TC
+        article(class='collapse navbar-collapse' id='navbarColor01')
+          ul(class='navbar-nav mr-auto')
+            li(class='nav-item')
+              form(class='d-flex' action='/search' method='get')
+                input(class='form-control me-2' type='text' placeholder='Book Title (e.g. London)' name='title')
+                button(class='btn btn-success' type='submit') &nbsp;
+                  i(class='fas fa-search' style='font-size:1.5rem;')
+          // Set Navbar according to user login
+          ul(class='navbar-nav me-2 mb-2 mb-lg-0')
+            if !user
+              li(class='nav-item')
+                a(class='nav-link' href='/auth/login') Log In
+              li(class='nav-item')
+                a(class='nav-link' href='/auth/signup') Sign Up
+            else
+              // Dropdown Menu
+              li(class='nav-item dropdown')
+                a(class='nav-link dropdown-toggle' data-bs-toggle='dropdown' href='#' role='button' aria-haspopup='true' aria-expanded='true') #{user.local.username}
+                article(class='dropdown-menu')
+                  a(class='dropdown-item' href='/profile') Profile
+                  a(class='dropdown-item' href='/profile/trade') Trade List
+                  article(class='dropdown-divider')
+                  - let userIdDrop = user._id
+                  a(class='dropdown-item' href='/profile/setting/' + userIdDrop) Setting
+              li(class='nav-item')
+                a(class='nav-link' href='/allbooks') All Books
+              li(class='nav-item')
+                a(class='nav-link' href='/auth/logout') Log Out
+    if (message.length > 0)
+      // If there are messages
+      article(class='alert alert-dismissible alert-warning container-fluid mt-2')
+        button(type='button' class='btn-close' aria-label='Close' data-bs-dismiss='alert') &times;
+        h4 Warning!
+        p ${message}
+    article(class='mt-3 container-fluid' id='settingForm')
+      // Create Update Profile Form
+      - let userIdForm = user._id
+      - let username = user.local.username
+      - let useremail = user.local.email
+      form(action='/profile/setting/' + userIdForm method='post')
+        h2(class='text-center') Update Profile &nbsp;
+          i(class='fas fa-user-edit')
+        article(class='mb-3 alert alert-warning' role='alert')
+          label(for='settingUsername' class='form-label') Username
+          input(type='text' id='settingUsername' name='username' placeholder=username class='form-control' required)
+        article(class='mb-3 alert alert-warning' role='alert')
+          label(for='settingEmail' class='form-label') Email
+          input(type='email' id='settingEmail' name='email' placeholder=useremail class='form-control' required)
+        article(class='mb-3 alert alert-warning' role='alert')
+          label(for='settingPassword' class='form-label') Password
+          input(type='password' id='settingPassword' name='password' placeholder='Enter new password' class='form-control' required)
+        article(class='mb-3')
+          label(for='settingCity' class='form-label') City
+          input(type='text' id='settingCity' name='city' placeholder='Enter city' class='form-control')
+        article(class='mb-3')
+          label(for='settingCounty' class='form-label') County
+          input(type='text' id='settingCounty' name='county' placeholder='Enter county (or equivalent)' class='form-control')
+        article(class='mb-3')
+          label(for='settingCountry' class='form-label') Country
+          input(type='text' id='settingCountry' name='country' placeholder='Enter country name' class='form-control')
+        article(class='d-grid gap-2 d-flex justify-content-center')
+          input(type='submit' class='btn btn-primary' value='Update Profile')
+    // Load Scripts
+    script(src='https://cdn.jsdelivr.net/npm/bootstrap@5.1.1/dist/js/bootstrap.bundle.min.js')    

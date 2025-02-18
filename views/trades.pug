@@ -1,0 +1,79 @@
+doctype html
+html(lang='en')
+  head
+    title Trades
+    meta(charset='utf-8')
+    meta(name='description', content='Book Trading Club')
+    meta(name='viewport', content='width=device-width, initial-scale=1')
+    link(rel='stylesheet' href='https://cdn.jsdelivr.net/npm/bootstrap@5.1.1/dist/css/bootstrap.min.css')
+    link(rel='stylesheet' href='https://use.fontawesome.com/releases/v5.15.4/css/all.css')
+    link(rel='stylesheet' href='/style.css')
+  body
+    // Navbar
+    nav.navbar.navbar-expand-lg.navbar-dark.bg-primary
+      .container-fluid
+        button.navbar-toggler(type='button', data-bs-toggle='collapse', data-bs-target='#navbarColor01', aria-controls='navbarColor01', aria-expanded='false', aria-label='Toggle navigation')
+          span.navbar-toggler-icon
+        a.navbar-brand(href='/', style='color:yellow;') Book TC
+        .collapse.navbar-collapse#navbarColor01
+          form.d-flex(action='/search', method='get')
+            input.form-control.me-2(type='text', aria-label='Book Title', placeholder='Book Title (e.g. London)', name='title')
+            button.btn.btn-success(type='submit')
+              i.fas.fa-search(style='font-size:1.5rem;')
+          ul.navbar-nav.me-auto.mb-2.mb-lg-0
+            if !user
+              li.nav-item
+                a.nav-link(href='/auth/login') Log In
+              li.nav-item
+                a.nav-link(href='/auth/signup') Sign Up
+            else
+              li.nav-item.dropdown
+                a.nav-link.dropdown-toggle(data-bs-toggle='dropdown', href='#', role='button', aria-haspopup='true', aria-expanded='true') #{user.local.username}
+                .dropdown-menu
+                  a.dropdown-item(href='/profile') Profile
+                  a.dropdown-item(href='/profile/trade') Trade List
+                  .dropdown-divider
+                  a.dropdown-item(href='/profile/setting/' + user._id) Setting
+              li.nav-item
+                a.nav-link(href='/allbooks') All Books
+              li.nav-item
+                a.nav-link(href='/auth/logout') Log Out
+    .container-fluid
+      h1 Trades
+      if trades && trades.length
+        each trade in trades
+          article
+            h2 Trade ID: #{trade._id}
+            p Proposer: #{trade.proposer ? trade.proposer.local.username : '[User not available]'}
+            p Proposee: #{trade.proposee ? trade.proposee.local.username : '[User not available]'}
+            if trade.book
+              p Book: #{trade.book.title} by #{trade.book.author}
+            else
+              p Book: [Book information not available]
+            p Status: #{trade.status}
+
+            // Debug information to check conditions
+            p trade.proposee._id: #{trade.proposee ? trade.proposee._id : 'N/A'}
+            p user._id: #{user._id}
+            if trade.status === 'pending'
+              p Trade status is pending
+                if trade.proposer && trade.proposer._id.toString() === user._id.toString()                
+                  form(action=`/trades/acceptRequest/${trade._id}`, method='post')
+                    button(type='submit', class='btn btn-success') Accept
+                  form(action=`/trades/rejectRequest/${trade._id}`, method='post')
+                    button(type='submit', class='btn btn-danger') Reject
+                  form(action=`/trades/cancelRequest/${trade._id}`, method='post')
+                    button(type='submit', class='btn btn-warning') Cancel
+      if !trades || !trades.length
+        p No trade requests available.
+      hr
+      form(action='/trades/propose', method='post')
+        .mb-3
+          label(for='proposee') Proposee ID:
+          input.form-control(type='text', name='proposee', required)
+        .mb-3
+          label(for='book') Book ID:
+          input.form-control(type='text', name='book', required)
+        button.btn.btn-primary(type='submit') Propose Trade
+
+    script(src='https://cdn.jsdelivr.net/npm/bootstrap@5.1.1/dist/js/bootstrap.bundle.min.js')
