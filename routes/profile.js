@@ -108,31 +108,45 @@ router.get('/allbooks', isLoggedIn, async (req, res) => {
 
 // Delete Book from the Profile
 router.post('/removeBook/:bookID', isLoggedIn, function(req, res) {
-  let book_id = req.params.bookID;
-  User.findById(req.user._id, function(err, user) {
-    if (err) {
-      console.log(err);
-      return;
-    }
-
-    let bookIndex = user.local.addedbooks.indexOf(book_id);
-    user.local.addedbooks.splice(bookIndex, 1);
-    user.save(function(err) {
+    let book_id = req.params.bookID;
+    User.findById(req.user._id, function(err, user) {
       if (err) {
         console.log(err);
         return;
       }
-
-      Book.findByIdAndRemove(book_id, function(err, book) {
-        if (err) {
-          console.log(err);
-          return;
-        }
+  
+      // Check if user.local.addedbooks exists and is an array
+      if (!user.local.addedbooks) {
+        user.local.addedbooks = [];
+      }
+  
+      let bookIndex = user.local.addedbooks.indexOf(book_id);
+  
+      // Handle case where book_id is not found in the array
+      if (bookIndex > -1) {
+        user.local.addedbooks.splice(bookIndex, 1);
+  
+        user.save(function(err) {
+          if (err) {
+            console.log(err);
+            return;
+          }
+  
+          Book.findByIdAndRemove(book_id, function(err, book) {
+            if (err) {
+              console.log(err);
+              return;
+            }
+            res.redirect('/profile');
+          });
+        });
+      } else {
+        console.log(`Book with ID ${book_id} not found in user's addedbooks array`);
         res.redirect('/profile');
-      });
+      }
     });
   });
-});
+  
 
 // Trade List
 router.get('/trade', isLoggedIn, function(req, res) {
