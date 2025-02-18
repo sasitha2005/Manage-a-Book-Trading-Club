@@ -3,6 +3,7 @@ const router = express.Router();
 const bcrypt = require('bcrypt');
 const mongoose = require('mongoose');
 const saltRounds = 10;
+
 const { User, Book, Trade } = require('../models');
 
 // Profile Route
@@ -83,7 +84,7 @@ router.post('/addBook', isLoggedIn, function(req, res) {
       if (!user.local.addedbooks) {
         user.local.addedbooks = [];  // Initialize the array if it doesn't exist
       }
-      user.local.addedbooks.push(myNewBook);
+      user.local.addedbooks.push(myNewBook._id); // Ensure it's the book ID being pushed
       user.save(function(err) {
         if (err) {
           console.log(err);
@@ -95,160 +96,46 @@ router.post('/addBook', isLoggedIn, function(req, res) {
   });
 });
 
-// Route to get all books
-router.get('/allbooks', isLoggedIn, async (req, res) => {
-  try {
-    const books = await Book.find({ owner: req.user._id }).exec();
-    res.render('allbooks', { books });
-  } catch (err) {
-    console.error('Error fetching books:', err);
-    res.status(500).send('Error fetching books');
-  }
-});
-
 // Delete Book from the Profile
 router.post('/removeBook/:bookID', isLoggedIn, function(req, res) {
-    let book_id = req.params.bookID;
-    User.findById(req.user._id, function(err, user) {
-      if (err) {
-        console.log(err);
-        return;
-      }
-  
-      // Check if user.local.addedbooks exists and is an array
-      if (!user.local.addedbooks) {
-        user.local.addedbooks = [];
-      }
-  
-      let bookIndex = user.local.addedbooks.indexOf(book_id);
-  
-      // Handle case where book_id is not found in the array
-      if (bookIndex > -1) {
-        user.local.addedbooks.splice(bookIndex, 1);
-  
-        user.save(function(err) {
-          if (err) {
-            console.log(err);
-            return;
-          }
-  
-          Book.findByIdAndRemove(book_id, function(err, book) {
-            if (err) {
-              console.log(err);
-              return;
-            }
-            res.redirect('/profile');
-          });
-        });
-      } else {
-        console.log(`Book with ID ${book_id} not found in user's addedbooks array`);
-        res.redirect('/profile');
-      }
-    });
-  });
-  
-
-// Trade List
-router.get('/trade', isLoggedIn, function(req, res) {
-  Book.find({ owner: req.user._id }).exec(function(err, books) {
-    if (err) {
-      console.log(err);
-      return;
-    }
-
-    res.render("profile_tradelist", {
-      title: "Profile Tradelist",
-      books: books
-    });
-  });
-});
-
-// Trade Books
-router.post('/trade/:bookID', isLoggedIn, function(req, res) {
   let book_id = req.params.bookID;
-  let currentUser = req.user._id;
-  Book.findById(book_id).populate({ path: 'owner', model: 'User' }).exec(function(err, book) {
+  User.findById(req.user._id, function(err, user) {
     if (err) {
       console.log(err);
       return;
     }
 
-    if (!book || !book.owner) {
-      console.error('Book or Book owner not found');
-      res.status(500).send('Book or Book owner not found');
-      return;
+    if (!user.local.addedbooks) {
+      user.local.addedbooks = [];
     }
 
-    let bookOwner = book.owner._id;
+    let bookIndex = user.local.addedbooks.indexOf(book_id);
 
-    // If requester is current user, flash bad request
-    if (currentUser.equals(bookOwner)) {
-      req.flash('tradeMessage', "Bad Request");
-      res.redirect('/allbooks');
-    } else {
-      // Find if trade existed
-      Trade.findOne({ from: currentUser, to: bookOwner, book: book._id, status: 'pending' }, function(err, trade) {
+    if (bookIndex > -1) {
+      user.local.addedbooks.splice(bookIndex, 1);
+
+      user.save(function(err) {
         if (err) {
           console.log(err);
           return;
         }
 
-        if (trade) {
-          // If trade existed, flash message and redirect to allbooks Page
-          console.log('You already submitted trade request to the book owner');
-          req.flash('tradeMessage', 'You already submitted trade request to the book owner');
-          res.redirect('/allbooks');
-        } else {
-          // If trade does not exist, save new trade request to new collection
-          let myNewTrade = new Trade();
-          myNewTrade.from = currentUser;
-          myNewTrade.to = bookOwner;
-          myNewTrade.book = book._id;
-
-          // Save new trade request
-          myNewTrade.save(function(err) {
-            if (err) {
-              console.log(err);
-              return;
-            }
-
-            // Change book status from available to pending
-            book.status = 'pending';
-            // Save new book status
-            book.save(function(err) {
-              if (err) {
-                console.log(err);
-              }
-              req.flash('tradeMessage', 'Good Request');
-              res.redirect('/allbooks');
-            });
-          });
-        }
+        Book.findByIdAndRemove(book_id, function(err) {
+          if (err) {
+            console.log(err);
+            return;
+          }
+          res.redirect('/profile');
+        });
       });
+    } else {
+      console.log(`Book with ID ${book_id} not found in user's addedbooks array`);
+      res.redirect('/profile');
     }
   });
 });
 
-router.get('/allbooks/trade', isLoggedIn, async (req, res) => {
-  try {
-    const books = await Book.find().populate('owner', 'local.username').exec();
-    const reqsFromUserToOwner = await Trade.find({ proposer: req.user._id }).populate('book').exec();
-    const reqsFromOwnerToUser = await Trade.find({ proposee: req.user._id }).populate('book').exec();
-
-    res.render('allbooks', {
-      books,
-      reqsFromUserToOwner,
-      reqsFromOwnerToUser,
-      user: req.user,
-      message: req.flash('tradeMessage')
-    });
-  } catch (err) {
-    console.error('Error fetching books and trades:', err);
-    res.status(500).send('Error fetching books and trades');
-  }
-})
-
-// Login function
+// LogIn function
 function isLoggedIn(req, res, next) {
   if (req.isAuthenticated()) {
     return next();

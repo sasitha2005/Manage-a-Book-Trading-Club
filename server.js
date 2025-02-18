@@ -56,17 +56,20 @@ const profile = require('./routes/profile.js');
 const trades = require('./routes/trades.js');
 const allbooks = require('./routes/allbooks.js');
 
+
 // Add console logs to confirm each route is loaded
 console.log('Auth route loaded:', auth);
 console.log('Profile route loaded:', profile);
 console.log('Trades route loaded:', trades);
 console.log('Allbooks route loaded:', allbooks);
 
+
 // Use Routes
 app.use('/auth', auth);
 app.use('/profile', profile);
 app.use('/trades', trades);
 app.use('/allbooks', allbooks);
+
 
 // Home Route
 app.get('/', function (req, res) {
